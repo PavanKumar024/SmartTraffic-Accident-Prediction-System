@@ -327,19 +327,20 @@ elif page == "📈 Analytics Dashboard":
                 )
                 st.plotly_chart(fig_vehicle_pie, use_container_width=True)
     
-    with tab2:
+    with tabs[1]:
+        # ← Insert your time‐analysis code here
         if 'hour' in df.columns:
             hourly_accidents = df.groupby('hour').size().reset_index(name='count')
             fig = px.line(
-                hourly_accidents, 
-                x='hour', 
+                hourly_accidents,
+                x='hour',
                 y='count',
                 title="Accidents by Hour of Day",
                 markers=True
             )
             fig.update_layout(xaxis_title="Hour", yaxis_title="Number of Accidents")
             st.plotly_chart(fig, use_container_width=True)
-        
+
         if 'Month_Num' in df.columns:
             monthly_accidents = df.groupby('Month_Num').size().reset_index(name='count')
             fig2 = px.bar(
@@ -349,7 +350,7 @@ elif page == "📈 Analytics Dashboard":
                 title="Accidents by Month"
             )
             st.plotly_chart(fig2, use_container_width=True)
-            
+
         # NEW: Vehicle Type in Time Analysis
         if 'Vehicle Type Involved' in df.columns and 'hour' in df.columns:
             st.markdown("#### 🚗 Vehicle Type Accidents by Hour")
@@ -364,14 +365,13 @@ elif page == "📈 Analytics Dashboard":
             )
             fig_vehicle_time.update_layout(xaxis_title="Hour of Day", yaxis_title="Number of Accidents")
             st.plotly_chart(fig_vehicle_time, use_container_width=True)
-            
-            # Heatmap for vehicle type vs hour
-            if len(vehicle_hourly) > 0:
-                vehicle_hour_pivot = df.pivot_table(
-                    values='Accident Severity', 
-                    index='Vehicle Type Involved', 
-                    columns='hour', 
-                    aggfunc='count', 
+
+            if not vehicle_hourly.empty:
+                vehicle_hour_pivot = vehicle_hourly.pivot_table(
+                    values='count',
+                    index='Vehicle Type Involved',
+                    columns='hour',
+                    aggfunc='sum',
                     fill_value=0
                 )
                 fig_heatmap = px.imshow(
@@ -381,7 +381,7 @@ elif page == "📈 Analytics Dashboard":
                     color_continuous_scale='Blues'
                 )
                 st.plotly_chart(fig_heatmap, use_container_width=True)
-    
+                
     with tab3:
         if 'Road Type' in df.columns:
             road_accidents = df['Road Type'].value_counts()
@@ -857,3 +857,4 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
