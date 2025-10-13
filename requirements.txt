@@ -13,3 +13,5 @@ streamlit
 folium
 pyproj
 scipy
+plotly
+
