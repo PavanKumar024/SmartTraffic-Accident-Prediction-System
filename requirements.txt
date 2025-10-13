@@ -1,0 +1,15 @@
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+joblib
+matplotlib
+seaborn
+prophet          # install 'prophet' or 'fbprophet' depending on your environment
+geopandas
+shap
+streamlit
+folium
+pyproj
+scipy
