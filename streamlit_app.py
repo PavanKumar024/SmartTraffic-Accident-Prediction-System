@@ -330,28 +330,6 @@ elif page == "📈 Analytics Dashboard":
     with tab2:
         st.subheader("⏰ Time Analysis")
 
-        # Try to detect actual time & month column names in your dataset
-        time_col_candidates = ['hour', 'Hour', 'Hour_of_Day', 'Hour (24)']
-        month_col_candidates = ['Month_Num', 'Month', 'month', 'Month Number']
-
-        hour_col = next((c for c in time_col_candidates if c in df.columns), None)
-        month_col = next((c for c in month_col_candidates if c in df.columns), None)
-
-        # ---- Accidents by Hour ----
-        if hour_col:
-            hourly_accidents = df.groupby(hour_col).size().reset_index(name='count')
-            fig = px.line(
-                hourly_accidents,
-                x=hour_col,
-                y='count',
-                title="Accidents by Hour of Day",
-                markers=True
-            )
-            fig.update_layout(xaxis_title="Hour", yaxis_title="Number of Accidents")
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No 'hour' column found (e.g. hour, Hour). Please check your dataset column names.")
-
         # ---- Accidents by Month ----
         if month_col:
             monthly_accidents = df.groupby(month_col).size().reset_index(name='count')
@@ -384,24 +362,53 @@ elif page == "📈 Analytics Dashboard":
             )
             st.plotly_chart(fig_vehicle_time, use_container_width=True)
 
-            if not vehicle_hourly.empty:
-                vehicle_hour_pivot = vehicle_hourly.pivot_table(
-                    values='count',
-                    index='Vehicle Type Involved',
-                    columns=hour_col,
-                    aggfunc='sum',
-                    fill_value=0
-                )
-                fig_heatmap = px.imshow(
-                    vehicle_hour_pivot,
-                    title="Vehicle Type Accidents Heatmap by Hour",
-                    labels={'x': 'Hour of Day', 'y': 'Vehicle Type', 'color': 'Accident Count'},
-                    color_continuous_scale='Blues'
-                )
-                st.plotly_chart(fig_heatmap, use_container_width=True)
+        # 1) Driver age distribution
+        if 'Driver Age' in df.columns:
+            fig_age = px.histogram(
+                df,
+                x='Driver Age',
+                nbins=20,
+                title="Driver Age Distribution"
+            )
+            fig_age.update_layout(xaxis_title="Age", yaxis_title="Number of Drivers")
+            st.plotly_chart(fig_age, use_container_width=True)
         else:
-            if 'Vehicle Type Involved' not in df.columns:
-                st.info("Column 'Vehicle Type Involved' not found, so vehicle-wise time analysis is skipped.")
+            st.info("Column 'Driver Age' not found in dataset.")
+
+        # 2) Speed limit distribution
+        if 'Speed Limit (km/h)' in df.columns:
+            fig_speed = px.histogram(
+                df,
+                x='Speed Limit (km/h)',
+                nbins=10,
+                title="Speed Limit Distribution"
+            )
+            fig_speed.update_layout(xaxis_title="Speed Limit (km/h)", yaxis_title="Number of Locations")
+            st.plotly_chart(fig_speed, use_container_width=True)
+        else:
+            st.info("Column 'Speed Limit (km/h)' not found in dataset.")
+
+        # 3) Speed vs Road Type
+        if 'Speed Limit (km/h)' in df.columns and 'Road Type' in df.columns:
+            fig_speed_road = px.box(
+                df,
+                x='Road Type',
+                y='Speed Limit (km/h)',
+                title="Speed Limits by Road Type"
+            )
+            fig_speed_road.update_layout(xaxis_title="Road Type", yaxis_title="Speed Limit (km/h)")
+            st.plotly_chart(fig_speed_road, use_container_width=True)
+
+        # 4) Age vs Alcohol involvement
+        if 'Driver Age' in df.columns and 'Alcohol Involvement' in df.columns:
+            fig_age_alcohol = px.box(
+                df,
+                x='Alcohol Involvement',
+                y='Driver Age',
+                title="Driver Age vs Alcohol Involvement"
+            )
+            fig_age_alcohol.update_layout(xaxis_title="Alcohol Involvement", yaxis_title="Driver Age")
+            st.plotly_chart(fig_age_alcohol, use_container_width=True)
                 
     with tab3:
         if 'Road Type' in df.columns:
@@ -878,6 +885,7 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
