@@ -327,7 +327,7 @@ elif page == "📈 Analytics Dashboard":
                 )
                 st.plotly_chart(fig_vehicle_pie, use_container_width=True)
     
-    with tabs[1]:
+    with tab2:
         # ← Insert your time‐analysis code here
         if 'hour' in df.columns:
             hourly_accidents = df.groupby('hour').size().reset_index(name='count')
@@ -857,4 +857,5 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
 
