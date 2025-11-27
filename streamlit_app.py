@@ -328,48 +328,68 @@ elif page == "📈 Analytics Dashboard":
                 st.plotly_chart(fig_vehicle_pie, use_container_width=True)
     
     with tab2:
-        if 'hour' in df.columns:
-            hourly_accidents = df.groupby('hour').size().reset_index(name='count')
+        st.subheader("⏰ Time Analysis")
+
+        # Try to detect actual time & month column names in your dataset
+        time_col_candidates = ['hour', 'Hour', 'Hour_of_Day', 'Hour (24)']
+        month_col_candidates = ['Month_Num', 'Month', 'month', 'Month Number']
+
+        hour_col = next((c for c in time_col_candidates if c in df.columns), None)
+        month_col = next((c for c in month_col_candidates if c in df.columns), None)
+
+        # ---- Accidents by Hour ----
+        if hour_col:
+            hourly_accidents = df.groupby(hour_col).size().reset_index(name='count')
             fig = px.line(
-                hourly_accidents, 
-                x='hour', 
+                hourly_accidents,
+                x=hour_col,
                 y='count',
                 title="Accidents by Hour of Day",
                 markers=True
             )
             fig.update_layout(xaxis_title="Hour", yaxis_title="Number of Accidents")
             st.plotly_chart(fig, use_container_width=True)
-        
-        if 'Month_Num' in df.columns:
-            monthly_accidents = df.groupby('Month_Num').size().reset_index(name='count')
+        else:
+            st.info("No 'hour' column found (e.g. hour, Hour). Please check your dataset column names.")
+
+        # ---- Accidents by Month ----
+        if month_col:
+            monthly_accidents = df.groupby(month_col).size().reset_index(name='count')
             fig2 = px.bar(
                 monthly_accidents,
-                x='Month_Num',
+                x=month_col,
                 y='count',
                 title="Accidents by Month"
             )
             st.plotly_chart(fig2, use_container_width=True)
-            
-        if 'Vehicle Type Involved' in df.columns and 'hour' in df.columns:
+        else:
+            st.info("No 'Month' column found (e.g. Month_Num, Month). Please check your dataset column names.")
+
+        # ---- Vehicle Type in Time Analysis ----
+        if hour_col and 'Vehicle Type Involved' in df.columns:
             st.markdown("#### 🚗 Vehicle Type Accidents by Hour")
-            vehicle_hourly = df.groupby(['hour', 'Vehicle Type Involved']).size().reset_index(name='count')
+
+            vehicle_hourly = df.groupby([hour_col, 'Vehicle Type Involved']).size().reset_index(name='count')
             fig_vehicle_time = px.line(
                 vehicle_hourly,
-                x='hour',
+                x=hour_col,
                 y='count',
                 color='Vehicle Type Involved',
                 title="Vehicle Type Accidents Throughout the Day",
                 markers=True
             )
-            fig_vehicle_time.update_layout(xaxis_title="Hour of Day", yaxis_title="Number of Accidents")
+            fig_vehicle_time.update_layout(
+                xaxis_title="Hour of Day",
+                yaxis_title="Number of Accidents"
+            )
             st.plotly_chart(fig_vehicle_time, use_container_width=True)
-            
-            if len(vehicle_hourly) > 0:
-                vehicle_hour_pivot = df.pivot_table(
-                    values='Accident Severity', 
-                    index='Vehicle Type Involved', 
-                    columns='hour', 
-                    aggfunc='count', 
+
+            if not vehicle_hourly.empty:
+                vehicle_hour_pivot = vehicle_hourly.pivot_table(
+                    values='count',
+                    index='Vehicle Type Involved',
+                    columns=hour_col,
+                    aggfunc='sum',
                     fill_value=0
                 )
                 fig_heatmap = px.imshow(
@@ -379,6 +399,9 @@ elif page == "📈 Analytics Dashboard":
                     color_continuous_scale='Blues'
                 )
                 st.plotly_chart(fig_heatmap, use_container_width=True)
+        else:
+            if 'Vehicle Type Involved' not in df.columns:
+                st.info("Column 'Vehicle Type Involved' not found, so vehicle-wise time analysis is skipped.")
                 
     with tab3:
         if 'Road Type' in df.columns:
@@ -855,6 +878,7 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
