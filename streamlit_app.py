@@ -328,41 +328,7 @@ elif page == "📈 Analytics Dashboard":
                 st.plotly_chart(fig_vehicle_pie, use_container_width=True)
     
     with tab2:
-        st.subheader("⏰ Time Analysis")
-        
-         month_col_candidates = ['Month_Num', 'Month', 'month', 'Month Number']
-
-        # ---- Accidents by Month ----
-        if month_col:
-            monthly_accidents = df.groupby(month_col).size().reset_index(name='count')
-            fig2 = px.bar(
-                monthly_accidents,
-                x=month_col,
-                y='count',
-                title="Accidents by Month"
-            )
-            st.plotly_chart(fig2, use_container_width=True)
-        else:
-            st.info("No 'Month' column found (e.g. Month_Num, Month). Please check your dataset column names.")
-
-        # ---- Vehicle Type in Time Analysis ----
-        if hour_col and 'Vehicle Type Involved' in df.columns:
-            st.markdown("#### 🚗 Vehicle Type Accidents by Hour")
-
-            vehicle_hourly = df.groupby([hour_col, 'Vehicle Type Involved']).size().reset_index(name='count')
-            fig_vehicle_time = px.line(
-                vehicle_hourly,
-                x=hour_col,
-                y='count',
-                color='Vehicle Type Involved',
-                title="Vehicle Type Accidents Throughout the Day",
-                markers=True
-            )
-            fig_vehicle_time.update_layout(
-                xaxis_title="Hour of Day",
-                yaxis_title="Number of Accidents"
-            )
-            st.plotly_chart(fig_vehicle_time, use_container_width=True)
+        st.subheader("⏰ Driver & Speed Analysis")
 
         # 1) Driver age distribution
         if 'Driver Age' in df.columns:
@@ -411,7 +377,6 @@ elif page == "📈 Analytics Dashboard":
             )
             fig_age_alcohol.update_layout(xaxis_title="Alcohol Involvement", yaxis_title="Driver Age")
             st.plotly_chart(fig_age_alcohol, use_container_width=True)
-                
     with tab3:
         if 'Road Type' in df.columns:
             road_accidents = df['Road Type'].value_counts()
@@ -887,6 +852,7 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
