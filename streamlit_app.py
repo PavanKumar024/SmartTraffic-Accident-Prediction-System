@@ -329,6 +329,8 @@ elif page == "📈 Analytics Dashboard":
     
     with tab2:
         st.subheader("⏰ Time Analysis")
+        
+         month_col_candidates = ['Month_Num', 'Month', 'month', 'Month Number']
 
         # ---- Accidents by Month ----
         if month_col:
@@ -885,6 +887,7 @@ st.markdown("""
     <p>🚦 SmartTraffic Accident Predictor | Developed by M. Pavan Kumar | 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
